@@ -22,9 +22,21 @@ OUTPUT_PATH = "/output/entry.txt"
 
 
 def main() -> None:
+    # Gate: one sentence, 1-280 chars, no trailing newline, no blank text.
+    if not 1 <= len(ENTRY) <= 280:
+        raise ValueError(f"entry is {len(ENTRY)} chars, gate allows 1-280")
+    if ENTRY.strip() != ENTRY or "\n" in ENTRY:
+        raise ValueError("entry must be a single non-blank line")
+    if ENTRY.count(".") != 1 or not ENTRY.endswith("."):
+        raise ValueError("entry must be exactly one sentence")
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8", newline="") as f:
         f.write(ENTRY)
+    # Post-write check: what landed on disk must be byte-identical.
+    with open(OUTPUT_PATH, "r", encoding="utf-8", newline="") as f:
+        written = f.read()
+    if written != ENTRY:
+        raise ValueError("entry.txt on disk does not match the entry")
     print(f"wrote {len(ENTRY)} characters to {OUTPUT_PATH}")
 
 
